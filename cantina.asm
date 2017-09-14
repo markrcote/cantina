@@ -7,8 +7,8 @@
 LEFT_ARROW_COLOUR = $80
 RIGHT_ARROW_COLOUR = $81
 LAST_SWCHA = $82
-DISPLAYED_SIDE_DECK = $83
-SIDE_DECK = $84
+DISPLAYED_SIDE_DECK = $83 ; increment on SIDE_DECK (0..9)
+SIDE_DECK = $84   ; 10 bytes
 
     SEG
     ORG   $F000
@@ -35,7 +35,7 @@ Clear
     sta   SWACNT
     ;; ------------------------------------------------
 
-    ;; Dummy values
+    ;; Dummy values (FIXME: there should actually be 10)
     ldx   #0
     lda   PlusOne
     sta   SIDE_DECK,X
@@ -86,16 +86,22 @@ VerticalBlank
     ldy   #0
 DisplayArrowLine
     sta   WSYNC
+
+	; set colour and pixels for left playfield
     lda   LEFT_ARROW_COLOUR  ; 3 (3)
     sta   COLUPF             ; 3 (6)
     lda   Arrow,Y            ; 4 (10)
     sta   PF0                ; 4 (14)
+
     sleep 10                 ; 10 (24)
+
+	; set colour and pixels for right playfield
     lda   RIGHT_ARROW_COLOUR ; 3 (27)
     sta   COLUPF             ; 3 (30)
     iny                      ; 2 (32)
-	; arrows are 6 lines high
-    cpy   #6                 ; 2 (34)
+
+	; card and arrows are 8 lines high
+    cpy   #8                 ; 2 (34)
     bne   DisplayArrowLine
 
     ldy   #198
@@ -148,7 +154,7 @@ OverscanLine
 ;------------------------------------------------------------------------------
 
 Arrow
-    .byte $80,$C0,$E0,$C0,$80,$00
+    .byte $00,$00,$80,$C0,$E0,$C0,$80,$00
 PlusOne
     .byte $00,$02,$42,$E2,$42,$02,$02,$00
 MinusOne
