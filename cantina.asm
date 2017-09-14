@@ -85,7 +85,7 @@ VerticalBlank
 
     ldy   #0
 DisplayArrowLine
-    sta   WSYNC
+    sta   WSYNC              ; 3 (X / 75)
 
 	; set colour and pixels for left playfield
     lda   LEFT_ARROW_COLOUR  ; 3 (3)
@@ -93,20 +93,21 @@ DisplayArrowLine
     lda   Arrow,Y            ; 4 (10)
     sta   PF0                ; 4 (14)
 
-    sleep 10                 ; 10 (24)
+	; maximum allowed time before we have to set the right playfield
+    sleep 45                 ; 45 (59)
 
 	; set colour and pixels for right playfield
-    lda   RIGHT_ARROW_COLOUR ; 3 (27)
-    sta   COLUPF             ; 3 (30)
-    iny                      ; 2 (32)
+    lda   RIGHT_ARROW_COLOUR ; 3 (62)
+    sta   COLUPF             ; 3 (65)
+    iny                      ; 2 (67)
 
 	; card and arrows are 8 lines high
-    cpy   #8                 ; 2 (34)
-    bne   DisplayArrowLine
+    cpy   #8                 ; 2 (69)
+    bne   DisplayArrowLine   ; 3 (72) if true / 2 (71)
 
-    ldy   #198
+    ldy   #198               ; 2 (74)
 Ground
-    sta   WSYNC
+    sta   WSYNC              ; 3 (77)
     dey
     bne   Ground
 
