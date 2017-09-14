@@ -86,15 +86,16 @@ VerticalBlank
     ldy   #0
 DisplayArrowLine
     sta   WSYNC
-    lda   LEFT_ARROW_COLOUR
-    sta   COLUPF
-    lda   Arrow,Y
-    sta   PF0            ; 4 (30)
-    sleep 24
-    lda   RIGHT_ARROW_COLOUR
-    sta   COLUPF
-    iny
-    cpy   #6             ; arrows are 6 lines high 
+    lda   LEFT_ARROW_COLOUR  ; 3 (3)
+    sta   COLUPF             ; 3 (6)
+    lda   Arrow,Y            ; 4 (10)
+    sta   PF0                ; 4 (14)
+    sleep 10                 ; 10 (24)
+    lda   RIGHT_ARROW_COLOUR ; 3 (27)
+    sta   COLUPF             ; 3 (30)
+    iny                      ; 2 (32)
+	; arrows are 6 lines high
+    cpy   #6                 ; 2 (34)
     bne   DisplayArrowLine
 
     ldy   #198
