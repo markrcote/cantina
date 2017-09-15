@@ -7,7 +7,7 @@
 LEFT_ARROW_COLOUR = $80
 RIGHT_ARROW_COLOUR = $81
 LAST_SWCHA = $82
-DISPLAYED_SIDE_DECK = $83 ; increment on SIDE_DECK (0..3)
+SIDE_DECK_SELECTED = $83  ; increment on SIDE_DECK (0..3)
 SIDE_DECK = $84           ; 4 bytes
 
     SEG
@@ -35,7 +35,7 @@ Clear
     sta   SWACNT
     ;; ------------------------------------------------
 
-    ;; Dummy values (FIXME: there should actually be 10)
+    ;; Pre-loaded side deck, for testing
     ldx   #0
     lda   PlusOne
     sta   SIDE_DECK,X
@@ -48,6 +48,11 @@ Clear
     inx
     lda   MinusTwo
     sta   SIDE_DECK,X
+
+	;; More test data
+	lda   #2
+	sta   SIDE_DECK_SELECTED
+
 StartOfFrame
 
     ;; Start of new frame
