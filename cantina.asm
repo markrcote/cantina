@@ -189,18 +189,25 @@ OverscanLine
 
     jmp   StartOfFrame
 
-;------------------------------------------------------------------------------
+;--------------------------------------------------------------------
+
+CardTypes
+	;; Plus
+	.byte $00,$10,$10,$7C,$10,$10
+	;; Minus
+	.byte $00,$00,$00,$7C,$00,$00
+	;; TODO: +/-, flip, double, tiebreaker
+
+CardValues
+	;; One
+	.byte $08,$18,$08,$08,$08,$1C
+	;; Two
+	.byte $18,$24,$04,$08,$10,$3C
+	;; TODO: three, four, five, six, seven, eight, nine, ten
+	;; (seven to ten for main deck only)
 
 Arrow
     .byte $00,$00,$80,$C0,$E0,$C0,$80,$00
-PlusOne
-    .byte $00,$02,$42,$E2,$42,$02,$02,$00
-MinusOne
-    .byte $00,$02,$02,$E2,$02,$02,$02,$00
-PlusTwo
-    .byte $00,$06,$49,$E2,$44,$08,$0F,$00
-MinusTwo
-    .byte $00,$06,$09,$E2,$04,$08,$0F,$00
 
     ORG   $FFFA
 
