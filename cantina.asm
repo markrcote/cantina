@@ -4,10 +4,32 @@
     include "vcs.h"
     include "macro.h"
 
+	;; Cards are one byte: higher nibble is type, lower is value.
+	;; Type is mapped as follows:
+	;;   0 => +
+	;;   1 => -
+	;;   2 => +/-
+	;;   3 => flip
+	;;   4 => double
+	;;   5 => tiebreaker
+	;;
+	;; Value is a simple number, with the following exceptions,
+	;; according to card type:
+	;;   In the case of +/-, a value of 7 means "1 or 2"
+	;;   In the case of flip, values can only be 2, 3, 4, 6
+	;;   In the case of double or tiebreaker, value is ignored
+	;;
+	;; Note that card types will be progressively implemented.
+
+	;; Arrow colours are used to reflect joystick input (left/right)
 LEFT_ARROW_COLOUR = $80
 RIGHT_ARROW_COLOUR = $81
 LAST_SWCHA = $82
+
+	;; Currently selected side-deck card
 SIDE_DECK_SELECTED = $83  ; increment on SIDE_DECK (0..3)
+
+	;; 4-card side deck for the game
 SIDE_DECK = $84           ; 4 bytes
 
     SEG
@@ -37,20 +59,20 @@ Clear
 
     ;; Pre-loaded side deck, for testing
     ldx   #0
-    lda   PlusOne
+    lda   $01           ; +1
     sta   SIDE_DECK,X
     inx
-    lda   MinusOne
+    lda   $11           ; -1
     sta   SIDE_DECK,X
     inx
-    lda   PlusTwo
+    lda   $02           ; +2
     sta   SIDE_DECK,X
     inx
-    lda   MinusTwo
+    lda   $12           ; -2
     sta   SIDE_DECK,X
 
 	;; More test data
-	lda   #2
+	lda   #1            ; second card of side deck
 	sta   SIDE_DECK_SELECTED
 
 StartOfFrame
@@ -104,8 +126,12 @@ DisplayArrowLine
     lda   Arrow,Y            ; 4 (10)
     sta   PF0                ; 4 (14)
 
+	; load selected side-deck card type/value
+	ldx   SIDE_DECK_SELECTED ; 3 (17)
+	lda   SIDE_DECK,X        ; 4 (21)
+
 	; maximum allowed time before we have to set the right playfield
-    sleep 45                 ; 45 (59)
+    sleep 38                 ; 38 (59)
 
 	; set colour and pixels for right playfield
     lda   RIGHT_ARROW_COLOUR ; 3 (62)
