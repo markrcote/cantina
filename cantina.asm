@@ -83,6 +83,12 @@ VerticalBlank
     sta   NUSIZ0
     sta   WSYNC
 
+	; Display side-deck selector: left arrow, current side-deck card
+	; type, current side-deck card value (if any), right arrow
+	; (4 "sprites").
+	; Y contains current line, from 0, used to select line from
+	; sprites.
+
     ldy   #0
 DisplayArrowLine
     sta   WSYNC              ; 3 (X / 75)
