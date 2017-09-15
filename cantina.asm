@@ -7,8 +7,8 @@
 LEFT_ARROW_COLOUR = $80
 RIGHT_ARROW_COLOUR = $81
 LAST_SWCHA = $82
-DISPLAYED_SIDE_DECK = $83 ; increment on SIDE_DECK (0..9)
-SIDE_DECK = $84   ; 10 bytes
+DISPLAYED_SIDE_DECK = $83 ; increment on SIDE_DECK (0..3)
+SIDE_DECK = $84           ; 4 bytes
 
     SEG
     ORG   $F000
