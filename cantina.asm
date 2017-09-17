@@ -4,32 +4,32 @@
     include "vcs.h"
     include "macro.h"
 
-	;; Cards are one byte: higher nibble is type, lower is value.
-	;; Type is mapped as follows:
-	;;   0 => +
-	;;   1 => -
-	;;   2 => +/-
-	;;   3 => flip
-	;;   4 => double
-	;;   5 => tiebreaker
-	;;
-	;; Value is a simple number, with the following exceptions,
-	;; according to card type:
-	;;   In the case of +/-, a value of 7 means "1 or 2"
-	;;   In the case of flip, values can only be 2, 3, 4, 6
-	;;   In the case of double or tiebreaker, value is ignored
-	;;
-	;; Note that card types will be progressively implemented.
+    ;; Cards are one byte: higher nibble is type, lower is value.
+    ;; Type is mapped as follows:
+    ;;   0 => +
+    ;;   1 => -
+    ;;   2 => +/-
+    ;;   3 => flip
+    ;;   4 => double
+    ;;   5 => tiebreaker
+    ;;
+    ;; Value is a simple number, with the following exceptions,
+    ;; according to card type:
+    ;;   In the case of +/-, a value of 7 means "1 or 2"
+    ;;   In the case of flip, values can only be 2, 3, 4, 6
+    ;;   In the case of double or tiebreaker, value is ignored
+    ;;
+    ;; Note that card types will be progressively implemented.
 
-	;; Arrow colours are used to reflect joystick input (left/right)
+    ;; Arrow colours are used to reflect joystick input (left/right)
 LEFT_ARROW_COLOUR = $80
 RIGHT_ARROW_COLOUR = $81
 LAST_SWCHA = $82
 
-	;; Currently selected side-deck card
+    ;; Currently selected side-deck card
 SIDE_DECK_SELECTED = $83  ; increment on SIDE_DECK (0..3)
 
-	;; 4-card side deck for the game
+    ;; 4-card side deck for the game
 SIDE_DECK = $84           ; 4 bytes
 
     SEG
@@ -71,9 +71,9 @@ Clear
     lda   $12           ; -2
     sta   SIDE_DECK,X
 
-	;; More test data
-	lda   #1            ; second card of side deck
-	sta   SIDE_DECK_SELECTED
+    ;; More test data
+    lda   #1            ; second card of side deck
+    sta   SIDE_DECK_SELECTED
 
 StartOfFrame
 
@@ -110,35 +110,46 @@ VerticalBlank
     sta   NUSIZ0
     sta   WSYNC
 
-	; Display side-deck selector: left arrow, current side-deck card
-	; type, current side-deck card value (if any), right arrow
-	; (4 "sprites").
-	; Y contains current line, from 0, used to select line from
-	; sprites.
+    ; Display side-deck selector: left arrow, current side-deck card
+    ; type, current side-deck card value (if any), right arrow
+    ; (4 "sprites").
+    ; Y contains current line, from 0, used to select line from
+    ; sprites.
 
     ldy   #0
 DisplayArrowLine
     sta   WSYNC              ; 3 (X / 75)
 
-	; set colour and pixels for left playfield
+    ; set colour and pixels for left playfield
     lda   LEFT_ARROW_COLOUR  ; 3 (3)
     sta   COLUPF             ; 3 (6)
     lda   Arrow,Y            ; 4 (10)
     sta   PF0                ; 4 (14)
 
-	; load selected side-deck card type/value
-	ldx   SIDE_DECK_SELECTED ; 3 (17)
-	lda   SIDE_DECK,X        ; 4 (21)
+    ; load selected side-deck card type/value
+    ldx   SIDE_DECK_SELECTED ; 3 (17)
+    lda   SIDE_DECK,X        ; 4 (21)
+    lsr                      ; 2 (23)
+    lsr                      ; 2 (25)
+    lsr                      ; 2 (27)
+    lsr                      ; 2 (29)
+    tax                      ; 2 (31)
 
-	; maximum allowed time before we have to set the right playfield
-    sleep 38                 ; 38 (59)
+    ;; INCORRECT: X needs to be multiplied by 6, then offset by Y
+    ;; Consider making sprints 8 lines high for easier multiplication
+    lda   CardTypes,X        ; 4 (35) * might be 5 if crossing page
+    sta   GRP0               ; 3 (38)
+    sta   RESP0              ; 3 (41)
 
-	; set colour and pixels for right playfield
+    ; maximum allowed time before we have to set the right playfield
+    sleep 18                 ; 18 (59)
+
+    ; set colour and pixels for right playfield
     lda   RIGHT_ARROW_COLOUR ; 3 (62)
     sta   COLUPF             ; 3 (65)
     iny                      ; 2 (67)
 
-	; card and arrows are 8 lines high
+    ; card and arrows are 8 lines high
     cpy   #8                 ; 2 (69)
     bne   DisplayArrowLine   ; 3 (72) if true / 2 (71)
 
@@ -192,19 +203,19 @@ OverscanLine
 ;--------------------------------------------------------------------
 
 CardTypes
-	;; Plus
-	.byte $00,$10,$10,$7C,$10,$10
-	;; Minus
-	.byte $00,$00,$00,$7C,$00,$00
-	;; TODO: +/-, flip, double, tiebreaker
+    ;; Plus
+    .byte $00,$10,$10,$7C,$10,$10
+    ;; Minus
+    .byte $00,$00,$00,$7C,$00,$00
+    ;; TODO: +/-, flip, double, tiebreaker
 
 CardValues
-	;; One
-	.byte $08,$18,$08,$08,$08,$1C
-	;; Two
-	.byte $18,$24,$04,$08,$10,$3C
-	;; TODO: three, four, five, six, seven, eight, nine, ten
-	;; (seven to ten for main deck only)
+    ;; One
+    .byte $08,$18,$08,$08,$08,$1C
+    ;; Two
+    .byte $18,$24,$04,$08,$10,$3C
+    ;; TODO: three, four, five, six, seven, eight, nine, ten
+    ;; (seven to ten for main deck only)
 
 Arrow
     .byte $00,$00,$80,$C0,$E0,$C0,$80,$00
