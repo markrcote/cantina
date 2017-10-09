@@ -184,18 +184,18 @@ DisplayArrowLine
     ldy   #198               ; 2 (74)
 Ground
     sta   WSYNC              ; 3 (77)
-    dey
-    bne   Ground
+    dey                      ; 2 (2)
+    bne   Ground             ; 2** (4)
 
-    lda   0
-    sta   PF0
-    sta   PF1
-    sta   PF2
+    lda   0                  ; 3 (7)
+    sta   PF0                ; 3 (10)
+    sta   PF1                ; 3 (13)
+    sta   PF2                ; 3 (16)
 
     ;; ------------------------------------------------
 
-    lda   #%01000010
-    sta   VBLANK          ; end of screen - enter blanking
+    lda   #$42               ; 3 (19)
+    sta   VBLANK             ; 3 (21) end of screen - enter blanking
 
     ;; Check inputs
 
