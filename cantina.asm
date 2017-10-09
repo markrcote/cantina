@@ -110,23 +110,23 @@ VerticalBlank
     sta   NUSIZ0
     sta   WSYNC
 
-    ; Display side-deck selector: left arrow, current side-deck card
-    ; type, current side-deck card value (if any), right arrow
-    ; (4 "sprites").
-    ; Y contains current line, from 0, used to select line from
-    ; sprites.
+    ;; Display side-deck selector: left arrow, current side-deck card
+    ;; type, current side-deck card value (if any), right arrow
+    ;; (4 "sprites").
+    ;; Y contains current line, from 0, used to select line from
+    ;; sprites.
 
     ldy   #0
 DisplayArrowLine
     sta   WSYNC              ; 3 (X / 75)
 
-    ; set colour and pixels for left playfield
+    ;; set colour and pixels for left playfield
     lda   LEFT_ARROW_COLOUR  ; 3 (3)
     sta   COLUPF             ; 3 (6)
     lda   Arrow,Y            ; 4 (10)
     sta   PF0                ; 4 (14)
 
-    ; load selected side-deck card type/value
+    ;; load selected side-deck card type/value
     ldx   SIDE_DECK_SELECTED ; 3 (17)
     lda   SIDE_DECK,X        ; 4 (21)
     lsr                      ; 2 (23)
@@ -141,7 +141,7 @@ DisplayArrowLine
     sta   GRP0               ; 3 (38)
     sta   RESP0              ; 3 (41)
 
-    ; maximum allowed time before we have to set the right playfield
+    ;; maximum allowed time before we have to set the right playfield
     sleep 18                 ; 18 (59)
 
     ; set colour and pixels for right playfield
@@ -149,7 +149,7 @@ DisplayArrowLine
     sta   COLUPF             ; 3 (65)
     iny                      ; 2 (67)
 
-    ; card and arrows are 8 lines high
+    ;; card and arrows are 8 lines high
     cpy   #8                 ; 2 (69)
     bne   DisplayArrowLine   ; 3 (72) if true / 2 (71)
 
