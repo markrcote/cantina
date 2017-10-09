@@ -33,6 +33,8 @@ SIDE_DECK_SELECTED = $83  ; increment on SIDE_DECK (0..3)
 SIDE_DECK = $84           ; 4 bytes
 
 SCRATCH = $88
+TYPE_SPRITE_OFFSET = $89
+VALUE_SPRITE_OFFSET = $8A
 
     SEG
     ORG   $F000
@@ -62,16 +64,16 @@ Clear
 
     ;; Pre-loaded side deck, for testing
     ldx   #0
-    lda   $01           ; +1
+    lda   $00           ; +1
     sta   SIDE_DECK,X
     inx
-    lda   $11           ; -1
+    lda   $10           ; -1
     sta   SIDE_DECK,X
     inx
-    lda   $02           ; +2
+    lda   $01           ; +2
     sta   SIDE_DECK,X
     inx
-    lda   $12           ; -2
+    lda   $11           ; -2
     sta   SIDE_DECK,X
 
     ;; More test data
@@ -107,6 +109,34 @@ VerticalBlank
 
     ;; Blank space at top
     sta   WSYNC
+
+    ;; example: -1 is 00010001
+    ;;  need to take card type value, 1 (minus sign), in left nibble
+    ;;  multiple by 8 and put in right nibble:
+    ;;    00001000
+    ;;  after rotating once to right, AND with 11111000 ($f8) to clear
+    ;;  rest of right nibble
+
+    ;; load selected side-deck card type/value
+    ldx   SIDE_DECK_SELECTED ; 3 (3)
+    lda   SIDE_DECK,X        ; 4 (7)
+    lsr                      ; 2 (9)
+    and   #$f8               ; 2 (11)
+    ;; A now contains offset from CardTypes for first line of sprite
+    sta   TYPE_SPRITE_OFFSET ; 3 (14)
+
+    ;; Now same with card value.  It is in right nibble, so clear
+    ;; left and then multiple by 8.
+    lda   SIDE_DECK,X        ; 4 (18)
+    and   #$0f               ; 2 (20)
+    asl                      ; 2 (22)
+    asl                      ; 2 (24)
+    asl                      ; 2 (26)
+    sta   VALUE_SPRITE_OFFSET; 3 (29)
+
+    ;; Nudge card type over
+    lda   #$40
+    sta   HMP1
     sta   WSYNC
     sta   WSYNC
 
@@ -119,39 +149,28 @@ VerticalBlank
     ldy   #0
 DisplayArrowLine
     sta   WSYNC              ; 3 (X / 75)
-
     ;; set colour and pixels for left playfield
     lda   LEFT_ARROW_COLOUR  ; 3 (3)
     sta   COLUPF             ; 3 (6)
     lda   Arrow,Y            ; 4 (10)
-    sta   PF0                ; 4 (14)
+    sta   PF0                ; 3 (13)
 
-    ;; example: -1 is 00010001
-    ;;  need to take card type value, 1 (minus sign), in left nibble
-    ;;  multiple by 8 and put in right nibble:
-    ;;    00001000
-    ;;  after rotating once to right, AND with 11111000 ($f8) to clear
-    ;;  rest of right nibble
+    tya                      ; 2 (15)
+    adc   TYPE_SPRITE_OFFSET ; 3 (18)
+    tax                      ; 2 (20)
+    lda   CardTypes,X        ; 4 (24) * might be 5 if crossing page
+    sta   GRP0               ; 3 (27)
 
-    ;; load selected side-deck card type/value
-    ldx   SIDE_DECK_SELECTED ; 3 (17)
-    lda   SIDE_DECK,X        ; 4 (21)
-    lsr                      ; 2 (23)
-    and   #$f8               ; 2 (25)
-
-    ;; A now contains offset from CardTypes for first line of sprite
-    ;; need to add Y to get exact offset from CardTypes
-    sta   SCRATCH            ; 3 (28)
-    tya                      ; 2 (30)
-    adc   SCRATCH            ; 3 (33)
-    tax                      ; 2 (35)
-
-    lda   CardTypes,X        ; 4 (39) * might be 5 if crossing page
-    sta   GRP0               ; 3 (42)
-    sta   RESP0              ; 3 (45)
+    tya                      ; 2 (29)
+    adc   VALUE_SPRITE_OFFSET; 3 (32)
+    tax                      ; 2 (34)
+    lda   CardValues,X       ; 4 (38)
+    sta   GRP1               ; 3 (41)
+    sta   RESP0              ; 3 (44)
+    sta   RESP1              ; 3 (47)
 
     ;; maximum allowed time before we have to set the right playfield
-    sleep 14                  ; 14 (59)
+    sleep 12                 ; 12 (59)
 
     ; set colour and pixels for right playfield
     lda   RIGHT_ARROW_COLOUR ; 3 (62)
